@@ -5,14 +5,18 @@ from  django.shortcuts import render,get_object_or_404
 from  django.urls import  reverse
 from  django.views import generic
 
+from django.utils import timezone
+
 class IndexView(generic.ListView):
     template_name = 'polls/index.html'
     context_object_name = 'latest_question_list'
 
     def get_queryset(self):
         """Return the last five published questions."""
-        return Question.objects.order_by('-pub_date')[:5]
-
+        #Question.objects.filter(pub_date__lte=timezone.now()) r返回一个查询集,包括pub_date 小于或者等于timezone.now的Question
+        return Question.objects.filter(
+            pub_date__lte=timezone.now()
+        ).order_by('-pub_date')[:5]
 
 class DetailView(generic.DetailView):
     model = Question
