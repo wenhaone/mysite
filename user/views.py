@@ -17,8 +17,10 @@ class RegistView(View):
         name = request.POST.get("name")
         print(name)
         password = request.POST.get("password")
-        User.u_name = name
-        User.u_password = password
+        user = User()
+        user.u_name = name
+        user.u_password = password
+        user.save()
 
         return render(request,'user/index.html')
 
