@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'polls.apps.PollsConfig',
+    'user.apps.UserConfig',
 
 ]
 
@@ -78,11 +79,23 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': "mysite_study",
+        'USER': 'root',
+        'PASSWORD': "root",
+        'HOST': "localhost",
+        'PORT': '3306',
+        # 指定测试库信息
+        # 'TEST': {
+        #     'NAME': "zanhu_test",  # 测试过程中会生成名字为zanhu_test的数据库,测试结束后Django会自动删除该数据库
+        #     'CHARSET': 'utf8',  # 配置数据库的编码
+        #     'COLLATION': 'utf8_general_ci',
+        #     'init_command': 'SET default_storage_engine=INNODB',  # 数据库引擎
+        # },
+        'OPTIONS': {
+            'init_command': 'SET default_storage_engine=INNODB,character_set_connection=utf8,collation_connection=utf8_unicode_ci;'}
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -106,9 +119,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'zh-Hans'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
