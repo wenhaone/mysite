@@ -49,8 +49,13 @@ class LoginView(View):
     def get(self,request):
         return render(request,'user/login.html')
     def post(self,request):
+        #1、接收数据、2、校验数据
+        #3、登录校验 4、返回应答
         name = request.POST.get('name')
         password = request.POST.get('password')
+
+        if not all([name,password]):
+            return render(request,'user/login.html',{'msgerr':'参数不完整'})
         #如果验证成功，返回的是一个用户对象 否则为返回的是匿名用户，所有为空
         user = auth.authenticate(username=name,password=password)
         if user:
