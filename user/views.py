@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect,response
 from django.urls import  reverse
 from .models import User
 from django.contrib.auth.models import User
+from django.contrib.auth import login,logout
 import random
 import time
 from  django.template import loader
@@ -89,7 +90,11 @@ class LoginView(View):
         #     return render(request,'user/login.html',{'msgerror':'用户名不存在'})
 
 class LogoutView(View):
+    """退出登录"""
     def get(self,request):
-        response =  HttpResponseRedirect(reverse('user:index'))
-        response.delete_cookie('ticket')
+        #清除用户session信息
+        logout(request)
+        # response =  HttpResponseRedirect(reverse('user:index'))
+        # response.delete_cookie('ticket')
         return response
+        return HttpResponseRedirect('user/index')
