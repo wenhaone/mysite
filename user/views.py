@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from django.views.generic import View
 from django.http import HttpResponseRedirect,response
 from django.urls import  reverse
@@ -25,31 +25,52 @@ class IndexView(View):
             return HttpResponseRedirect('user/login.html')
 
 class RegistView(View):
+    #注册
     def get(self,request):
+        #显示注册页面
         return render(request,'user/regist.html')
     def post(self,request):
+        #进行注册处理
         username = request.POST.get("name")
         print(username)
         password = request.POST.get("password")
         print(password)
         # password = make_password(password)
-#校验用户名是否重复
+
+        #进行数据校验
+        if not all([username,password]):
+            return render(request,'user/regist.html',{'errmsg':'数据不完整'})
+
+        # 校验用户名是否重复
         try:
             user = User.objects.get(username=username)
         except Exception as e:
             user = None
         if user:
             return render(request,'user/regist.html',{'errmsg':'用户名已存在'})
+        #进行业务处理
 
         User.objects.create_user(username,password)
-        return HttpResponseRedirect('user/login')
+        return redirect(reverse('user:index'))
+        # return HttpResponseRedirect('user/login')
         # return render(request,'user/index.html')
 from django.contrib import auth
 
 class LoginView(View):
+
     def get(self,request):
-        return render(request,'user/login.html')
+        #判断是否记住的用户名
+        if 'username' in request.COOKIES:
+            username = request.COOKIES.get('username')
+            checked = 'checked'
+        else:
+            username = ''
+            checked = ''
+        #使用模板
+        return render(request,'user/login.html',{'username':username,'checked':checked})
+
     def post(self,request):
+        #登录校验
         #1、接收数据、2、校验数据
         #3、登录校验 4、返回应答
         name = request.POST.get('name')
@@ -60,11 +81,18 @@ class LoginView(View):
         #如果验证成功，返回的是一个用户对象 否则为返回的是匿名用户，所有为空
         user = auth.authenticate(username=name,password=password)
         if user:
+            #记录用户的登录状态
+            login(request,user)
+
             #将用户封装到 request.user中
             auth.login(request,user)
             return HttpResponseRedirect(reverse('user:index'))
+
         else:
-            return HttpResponseRedirect(reverse('user:login'))
+
+            # 用户名或密码错误
+            return render(request, 'login.html', {'errmsg': '用户名或密码错误'})
+            # return HttpResponseRedirect(reverse('user:login'))
         # #查询用户是否在数据库中
         # print(name , password)
         # if User.objects.filter(u_name = name).exists():
@@ -96,5 +124,5 @@ class LogoutView(View):
         logout(request)
         # response =  HttpResponseRedirect(reverse('user:index'))
         # response.delete_cookie('ticket')
-        return response
+        # return response
         return HttpResponseRedirect('user/index')
