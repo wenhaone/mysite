@@ -2,9 +2,10 @@ from django.shortcuts import render,redirect
 from django.views.generic import View
 from django.http import HttpResponseRedirect,response
 from django.urls import  reverse
-from .models import User
+# from .models import User
 from django.contrib.auth.models import User
 from django.contrib.auth import login,logout
+from django.contrib import auth
 import random
 import time
 from  django.template import loader
@@ -15,10 +16,10 @@ from django.contrib.auth.hashers import make_password,check_password
 class IndexView(View):
     def get(self,request):
         print(request.user.username)
-        ticket = request.COOKIES.get('ticket')
-        if not ticket:
-            return
-        if User.objects.filter(u_ticket=ticket).exists():
+        # ticket = request.COOKIES.get('ticket')
+        # if not ticket:
+        #     return
+        if User.objects.filter(username=request.user.username).exists():
             stuinfos = User.objects.all()
             return render(request,'user/index.html',{'stuinfos':stuinfos})
         else:
@@ -50,8 +51,10 @@ class RegistView(View):
             return render(request,'user/regist.html',{'errmsg':'用户名已存在'})
         #进行业务处理
 
-        User.objects.create_user(username,password)
-        return redirect(reverse('user:index'))
+        user = User.objects.create_user(username,password)
+        user.is_staff = True
+        user.save()
+        return redirect(reverse('user:login'))
         # return HttpResponseRedirect('user/login')
         # return render(request,'user/index.html')
 from django.contrib import auth
@@ -76,22 +79,25 @@ class LoginView(View):
         name = request.POST.get('name')
         password = request.POST.get('password')
 
+        print(name,password)
+
         if not all([name,password]):
             return render(request,'user/login.html',{'msgerr':'参数不完整'})
         #如果验证成功，返回的是一个用户对象 否则为返回的是匿名用户，所有为空
         user = auth.authenticate(username=name,password=password)
-        if user:
+        print(user)
+        if user is not None:
             #记录用户的登录状态
-            login(request,user)
+            auth.login(request,user)
 
             #将用户封装到 request.user中
-            auth.login(request,user)
+            # auth.login(request,user)
             return HttpResponseRedirect(reverse('user:index'))
 
         else:
 
             # 用户名或密码错误
-            return render(request, 'login.html', {'errmsg': '用户名或密码错误'})
+            return render(request, 'user/login.html', {'errmsg': '用户名或密码错误'})
             # return HttpResponseRedirect(reverse('user:login'))
         # #查询用户是否在数据库中
         # print(name , password)
